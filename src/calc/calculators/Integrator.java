@@ -56,8 +56,12 @@ public class Integrator {
     }
 
     public double integrate(double x1, double x2) {
-        // does breaking down into segments significantly improve accuracy of result? If not, return
-        double base = trap(x1, x2);
+        // if this is first call (no base estimate given) calc rough estimate to get started
+        return integrate(x1, x2, trap(x1, x2));
+    }
+
+    public double integrate(double x1, double x2, double base) {
+        // does breaking down into segments significantly improve accuracy over base prediction? If not, return
         double better = segTrap(x1, x2);
         if (error(base, better) < tolerance) {
             return better;
@@ -65,7 +69,9 @@ public class Integrator {
         // if so, go recursively deeper
         double sum = 0, interval = (x2 - x1) / segments;
         for (int i = 0; i < segments; i++) {
-            sum += integrate(x1 + interval * i, x1 + interval * (i + 1));
+            double x1Temp = x1 + interval * i,
+                    x2Temp = x1 + interval * (i + 1);
+            sum += integrate(x1Temp, x2Temp, trap(x1Temp, x2Temp));
         }
         return sum;
     }
